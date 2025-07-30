@@ -14,7 +14,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData,{withCredentials:true});
       navigate("/");
     } catch (error) {
       alert("Login failed: " + error.response?.data?.message || error.message);
