@@ -1,31 +1,44 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-const cookieParser = require("cookie-parser");
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://thedebugmind.web.app",
+];
+
+// ✅ CORS setup
 app.use(
   cors({
-    origin: true,           // reflects the request origin
-    credentials: true,      // allow sending cookies
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman) or from allowed list
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
-
-// Middleware
+// ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// Connect to MongoDB
+// ✅ Connect DB
 connectDB();
 
-// Routes
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 
-// Start server
-const PORT = process.env.PORT || 5000;
+// ✅ Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
