@@ -14,10 +14,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: "http://localhost:5173", // frontend URL
-  credentials: true,              // allow cookies
-}));
+const allowedOrigins = [
+  "http://localhost:5173",          // local frontend for dev
+  "https://thedebugmind.web.app",  // deployed frontend
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true, // allow sending cookies (withCredentials: true on client)
+  })
+);
+
 
 
 // Connect to MongoDB
