@@ -8,19 +8,13 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
-
-// ✅ Correctly configure CORS with allowed origins
-const allowedOrigins = [
-  "http://localhost:5173",         // local dev
-  "https://thedebugmind.web.app", // deployed frontend
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: true,           // reflects the request origin
+    credentials: true,      // allow sending cookies
   })
 );
+
 
 // Middleware
 app.use(express.json());
