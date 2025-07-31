@@ -20,13 +20,13 @@ exports.signup = async (req, res) => {
 );
 
 
-// Set cookie on login
 res.cookie("token", token, {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: process.env.NODE_ENV === "production",         // true in production
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   maxAge: 24 * 60 * 60 * 1000,
 });
+
 
     res.status(201).json({
       message: "User registered",
@@ -55,14 +55,13 @@ exports.login = async (req, res) => {
   { expiresIn: "1d" }
 );
 
-
- // Set cookie on login
 res.cookie("token", token, {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: process.env.NODE_ENV === "production",         // true in production
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   maxAge: 24 * 60 * 60 * 1000,
 });
+
 
     res.status(200).json({
       message: "Login successful",
