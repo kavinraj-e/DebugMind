@@ -20,12 +20,13 @@ exports.signup = async (req, res) => {
 );
 
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.secure,
-      sameSite: process.env.sameSite,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+// Set cookie on login
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  maxAge: 24 * 60 * 60 * 1000,
+});
 
     res.status(201).json({
       message: "User registered",
@@ -55,12 +56,13 @@ exports.login = async (req, res) => {
 );
 
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.secure,
-      sameSite: process.env.sameSite,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+ // Set cookie on login
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  maxAge: 24 * 60 * 60 * 1000,
+});
 
     res.status(200).json({
       message: "Login successful",
