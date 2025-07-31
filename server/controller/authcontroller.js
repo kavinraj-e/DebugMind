@@ -13,14 +13,17 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashedPassword });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+  { id: user._id, name: user.name, email: user.email },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: process.env.secure,
+      sameSite: process.env.sameSite,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -45,14 +48,17 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+  const token = jwt.sign(
+  { id: user._id, name: user.name, email: user.email },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: process.env.secure,
+      sameSite: process.env.sameSite,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -63,13 +69,4 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-};
-
-exports.logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-  });
-  res.status(200).json({ message: "Logged out" });
 };
