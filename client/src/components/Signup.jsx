@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import logo from "../assets/pngwing.com.png";
 
-export default function Signup() {
+export default function Signup({ setUser }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
 
@@ -14,10 +14,13 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, formData ,{withCredentials:true});
-      navigate("/login");
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, formData, {
+        withCredentials: true,
+      });
+      setUser(res.data.user); // ✅ Directly log them in
+      navigate("/");
     } catch (error) {
-      alert("Signup failed: " + error.response?.data?.message || error.message);
+      alert("Signup failed: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -26,14 +29,12 @@ export default function Signup() {
       <div className="hidden md:flex w-1/2 items-center justify-center p-6">
         <img src={logo} alt="Signup Illustration" className="w-3/4 max-w-sm object-contain" />
       </div>
-
       <div className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-20 py-10">
         <div className="mb-8 md:hidden text-center">
           <img src={logo} alt="Logo" className="mx-auto w-16 h-16 mb-3" />
           <h2 className="text-2xl font-bold text-black">📝 Join DebugMind</h2>
           <p className="text-gray-600 text-sm mt-1">Create your account below</p>
         </div>
-
         <div className="hidden md:block">
           <h2 className="text-3xl font-bold text-black">Create an Account</h2>
           <p className="text-gray-600 mt-2 mb-8">Sign up to start publishing on DebugMind</p>
@@ -52,7 +53,6 @@ export default function Signup() {
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -65,7 +65,6 @@ export default function Signup() {
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
@@ -78,11 +77,7 @@ export default function Signup() {
               required
             />
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-[#e3572b] text-white py-2 text-lg rounded-lg hover:opacity-90 transition"
-          >
+          <button type="submit" className="w-full bg-[#e3572b] text-white py-2 text-lg rounded-lg hover:opacity-90 transition">
             Sign Up
           </button>
         </form>

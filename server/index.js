@@ -4,7 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-
+ const postRoutes = require("./routes/postRoutes");
 dotenv.config();
 
 const app = express();
@@ -39,6 +39,6 @@ connectDB();
 
 // ✅ Routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/posts", postRoutes);
 // ✅ Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

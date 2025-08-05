@@ -1,93 +1,130 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import ReactMarkdown from "react-markdown";
+import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
 
-const posts = [
-  {
-    id: 1,
-    title: "Learn React in 2025",
-    description: "Hooks, server components, Tailwind — everything you need to build modern UIs.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwbwI6_Kr4kKDxH5UN_yc9p0AJqmdFx7tqQA&s",
-    username: "DevAnu",
-    likes: 102,
-    comments: 21,
-    tags: ["ReactJS", "Frontend"]
-  },
-  {
-    id: 2,
-    title: "Master Java for Backend",
-    description: "Java 21, Spring Boot 3 — building scalable APIs for production systems.",
-    image: "https://imgs.search.brave.com/rzGBwuTTl2bauVgbrlStirTQn5ciPi5sxeosAgDJ6Mo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/dzNzY2hvb2xzLmNv/bS9qYXZhL2ltYWdl/cy9pbWdfamF2YV9v/cGVyYXRvcnMucG5n", // truncated for brevity
-    username: "Sathish",
-    likes: 87,
-    comments: 15,
-    tags: ["Java", "Backend"]
-  },
-  {
-    id: 3,
-    title: "Getting Started with Next.js 14",
-    description: "Learn server actions, routing, and optimized builds in Next.js.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXqZRg7aJcCVNeA-YoHlNZeVdTSH7mP5fFwQ&s",
-    username: "Meena",
-    likes: 74,
-    comments: 10,
-    tags: ["Next.js", "WebDev"]
-  }
-];
+export default function Home() {
+  const [posts, setPosts] = useState([]);
+  const [userId, setUserId] = useState(null);
 
-function Home() {
+  useEffect(() => {
+    // Fetch posts
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/posts`, { withCredentials: true })
+      .then((res) => setPosts(res.data))
+      .catch((err) => console.error("Error fetching posts:", err));
+
+    // // Fetch current user
+    // axios
+    //   .get(`${import.meta.env.VITE_API_URL}/authprofile`, {
+    //     withCredentials: true,
+    //   })
+    //   .then((res) => setUserId(res.data._id))
+    //   .catch((err) => console.error("Error fetching user:", err));
+  }, []);
+
+  const handleLike = async (postId) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/posts/${postId}/like`,
+        {},
+        { withCredentials: true }
+      );
+
+      // Update local state
+      setPosts((prev) =>
+        prev.map((post) =>
+          post._id === postId ? { ...post, likes: res.data.likes } : post
+        )
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+    }
+  };
+
   return (
-    <div className="max-w-3xl mx-auto px-4 pt-24 pb-8 sm:pt-28">
-      <div className="grid gap-6">
-        {posts.map((post) => (
+    <div className="pt-24 max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {posts.map((post) => {
+        const isLiked = userId && post.likes?.includes(userId);
+
+        return (
           <div
-            key={post.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+            key={post._id}
+            className="bg-white rounded-xl shadow hover:shadow-lg transition-all duration-200 overflow-hidden"
           >
-            {/* Post Header */}
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-sm text-purple-700 font-bold">
-                {post.username.charAt(0)}
+            {/* Thumbnail */}
+            <Link to={`/post/${post._id}`}>
+              <div className="aspect-w-16 aspect-h-9 w-full">
+                <img
+                  src={post.thumbnail}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="text-sm text-gray-700 font-medium">{post.username}</div>
-            </div>
+            </Link>
 
-            {/* Responsive Image with Aspect Ratio */}
-            <div className="aspect-[16/9] w-full bg-gray-100">
-              <img
-                src={post.image}
-                alt={post.title}
-                className="w-full h-full object-contain"
-                onError={(e) => (e.target.src = "/fallback.jpg")}
-              />
-            </div>
-
-            {/* Post Content */}
             <div className="p-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">{post.title}</h2>
-              <p className="text-sm text-gray-600 mt-2">{post.description}</p>
+              <Link to={`/post/${post._id}`}>
+                <h2 className="text-lg font-bold mb-1">{post.title}</h2>
+              </Link>
 
-              {/* Tags */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
+              <div className="text-sm text-gray-500 mb-1 flex justify-between">
+                <span>{post.topic}</span>
+                <span className="italic">By {post.author?.name || "Unknown"}</span>
+              </div>
+
+              <p className="text-sm text-gray-700 mb-2">
+                <span className="font-semibold">Description:</span>{" "}
+                {post.description}
+              </p>
+
+              <div className="text-sm text-gray-800 mb-3 line-clamp-4 prose prose-sm max-w-none">
+                <ReactMarkdown>
+                  {post.content.length > 300
+                    ? post.content.slice(0, 300) + "..."
+                    : post.content}
+                </ReactMarkdown>
+              </div>
+
+              {/* Hashtags */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {post.hashtags?.map((tag, i) => (
                   <span
-                    key={tag}
-                    className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
+                    key={i}
+                    className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full"
                   >
-                    #{tag}
+                    {tag.startsWith("#") ? tag : `#${tag}`}
                   </span>
                 ))}
               </div>
 
-              {/* Likes and Comments */}
-              <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
-                <span>❤️ {post.likes} Likes</span>
-                <span>💬 {post.comments} Comments</span>
+              {/* Like and Comment Stats */}
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <button
+                  onClick={() => handleLike(post._id)}
+                  className="flex items-center gap-1 hover:text-red-500 transition"
+                >
+                  {isLiked ? (
+                    <FaHeart className="text-red-500" />
+                  ) : (
+                    <FaRegHeart className="text-red-500" />
+                  )}
+                  {post.likes?.length || 0}
+                </button>
+
+                <Link
+                  to={`/post/${post._id}`}
+                  className="flex items-center gap-1 hover:text-blue-500 transition"
+                >
+                  <FaComment className="text-blue-500" />
+                  {post.comments?.length || 0}
+                </Link>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
-
-export default Home;
